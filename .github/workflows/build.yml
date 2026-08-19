@@ -2,21 +2,31 @@ name: Build Custom APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
 
 jobs:
-
   build:
 
     runs-on: ubuntu-latest
 
     steps:
 
+      # =========================
+      # 1. دریافت پروژه
+      # =========================
+
       - name: Checkout
         uses: actions/checkout@v4
 
+
+      # =========================
+      # 2. Java
+      # =========================
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -25,381 +35,135 @@ jobs:
           java-version: "21"
 
 
+      # =========================
+      # 3. Node
+      # =========================
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
 
 
-      - name: Read Build Configuration
+      # =========================
+      # 4. بررسی HTML
+      # =========================
+
+      - name: Check HTML
         run: |
 
-          python3 <<'PY'
+          echo "Checking index.html..."
 
-          import json
-          from pathlib import Path
+          if [ ! -f "index.html" ]; then
+            echo "ERROR: index.html not found!"
+            exit 1
+          fi
 
-          config_file = Path("build-config.json")
+          echo "index.html found."
 
-          if not config_file.exists():
-              raise SystemExit(
-                  "build-config.json not found"
-              )
 
-          config = json.loads(
-              config_file.read_text(
-                  encoding="utf-8"
-              )
-          )
+      # =========================
+      # 5. ساخت پوشه www
+      # =========================
 
-          app_name = config.get(
-              "appName",
-              "My App"
-          )
+      - name: Prepare Web App
+        run: |
 
-          print(
-              "Building:",
-              app_name
-          )
+          rm -rf www
 
-          PY
+          mkdir -p www
 
+          cp index.html www/index.html
+
+          echo "Web files:"
+          ls -lah www
+
+
+      # =========================
+      # 6. ساخت package.json
+      # =========================
 
       - name: Create package.json
         run: |
 
-          cat > package.json <<'JSON'
-
+          cat > package.json <<'EOF'
           {
             "name": "custom-apk-builder",
             "version": "1.0.0",
             "private": true,
-            "scripts": {
-              "build": "echo build"
-            },
             "dependencies": {
-              "@capacitor/core": "^7.4.0",
-              "@capacitor/android": "^7.4.0",
-              "@capacitor/cli": "^7.4.0"
+              "@capacitor/core": "^7.4.3"
+            },
+            "devDependencies": {
+              "@capacitor/cli": "^7.4.3"
             }
           }
+          EOF
 
-          JSON
 
+      # =========================
+      # 7. نصب Capacitor
+      # =========================
 
       - name: Install Capacitor
-        run: npm install
-
-
-      - name: Prepare Website
         run: |
 
-          mkdir -p www
+          npm install
 
-          python3 <<'PY'
-
-          import json
-          import base64
-          from pathlib import Path
-
-          config = json.loads(
-              Path("build-config.json").read_text(
-                  encoding="utf-8"
-              )
-          )
-
-          app_name = config.get(
-              "appName",
-              "My App"
-          )
-
-          html = config.get(
-              "htmlCode",
-              ""
-          )
-
-          site_url = config.get(
-              "siteUrl",
-              ""
-          )
-
-          splash_text = config.get(
-              "splashText",
-              ""
-          )
+          npm install @capacitor/android@7.4.3
 
 
-          # اگر HTML وجود نداشته باشد،
-          # از لینک سایت استفاده می‌کنیم.
-
-          if html.strip():
-
-              final_html = html
-
-          elif site_url.strip():
-
-              final_html = f"""<!DOCTYPE html>
-          <html>
-          <head>
-          <meta charset="UTF-8">
-          <meta
-              name="viewport"
-              content="width=device-width,initial-scale=1"
-          >
-          <title>{app_name}</title>
-
-          <style>
-          html,body {{
-              margin:0;
-              padding:0;
-              width:100%;
-              height:100%;
-              overflow:hidden;
-          }}
-
-          iframe {{
-              width:100%;
-              height:100%;
-              border:0;
-          }}
-          </style>
-
-          </head>
-
-          <body>
-
-          <iframe
-              src="{site_url}"
-          ></iframe>
-
-          </body>
-          </html>
-          """
-
-          else:
-
-              final_html = f"""<!DOCTYPE html>
-          <html lang="fa" dir="rtl">
-          <body>
-          <h1>{app_name}</h1>
-          <p>هیچ HTML یا لینکی وارد نشده است.</p>
-          </body>
-          </html>
-          """
-
-
-          Path(
-              "www/index.html"
-          ).write_text(
-              final_html,
-              encoding="utf-8"
-          )
-
-
-          # تصویر لوگو
-
-          icon_data = config.get(
-              "icon",
-              ""
-          )
-
-          if icon_data:
-
-              try:
-
-                  header, data = icon_data.split(
-                      ",",
-                      1
-                  )
-
-                  image_bytes = base64.b64decode(
-                      data
-                  )
-
-                  Path(
-                      "icon-source"
-                  ).write_bytes(
-                      image_bytes
-                  )
-
-              except Exception as e:
-
-                  print(
-                      "Icon error:",
-                      e
-                  )
-
-
-          # تصویر Splash
-
-          splash_data = config.get(
-              "splash",
-              ""
-          )
-
-          if splash_data:
-
-              try:
-
-                  header, data = splash_data.split(
-                      ",",
-                      1
-                  )
-
-                  image_bytes = base64.b64decode(
-                      data
-                  )
-
-                  Path(
-                      "splash-source"
-                  ).write_bytes(
-                      image_bytes
-                  )
-
-              except Exception as e:
-
-                  print(
-                      "Splash error:",
-                      e
-                  )
-
-
-          PY
-
+      # =========================
+      # 8. ساخت Capacitor Config
+      # =========================
 
       - name: Create Capacitor Config
         run: |
 
-          python3 <<'PY'
-
-          import json
-          from pathlib import Path
-
-          config = json.loads(
-              Path("build-config.json").read_text(
-                  encoding="utf-8"
-              )
-          )
-
-          app_name = config.get(
-              "appName",
-              "My App"
-          )
-
-          capacitor = {
-
-              "appId":
-                  "com.apkbuilder.generated",
-
-              "appName":
-                  app_name,
-
-              "webDir":
-                  "www",
-
-              "bundledWebRuntime":
-                  False
-
+          cat > capacitor.config.json <<'EOF'
+          {
+            "appId": "com.custom.apk",
+            "appName": "Custom APK",
+            "webDir": "www"
           }
+          EOF
 
-          Path(
-              "capacitor.config.json"
-          ).write_text(
 
-              json.dumps(
-                  capacitor,
-                  ensure_ascii=False,
-                  indent=2
-              ),
-
-              encoding="utf-8"
-          )
-
-          PY
-
+      # =========================
+      # 9. ساخت Android
+      # =========================
 
       - name: Add Android
-        run: npx cap add android
+        run: |
 
+          npx cap add android
+
+
+      # =========================
+      # 10. انتقال HTML
+      # =========================
 
       - name: Sync Capacitor
-        run: npx cap sync android
-
-
-      - name: Configure Android App Name
         run: |
 
-          python3 <<'PY'
-
-          import json
-          import re
-          from pathlib import Path
-
-          config = json.loads(
-              Path("build-config.json").read_text(
-                  encoding="utf-8"
-              )
-          )
-
-          app_name = config.get(
-              "appName",
-              "My App"
-          )
+          npx cap sync android
 
 
-          strings = Path(
-              "android/app/src/main/res/values/strings.xml"
-          )
+      # =========================
+      # 11. بررسی اینکه HTML واقعاً وارد APK شده
+      # =========================
 
-          if strings.exists():
-
-              text = strings.read_text(
-                  encoding="utf-8"
-              )
-
-              text = re.sub(
-                  r'<string name="app_name">.*?</string>',
-                  '<string name="app_name">'
-                  + app_name
-                  + '</string>',
-                  text
-              )
-
-              strings.write_text(
-                  text,
-                  encoding="utf-8"
-              )
-
-          PY
-
-
-      - name: Configure Icon
+      - name: Verify Web App
         run: |
 
-          if [ -f "icon-source" ]; then
+          echo "Checking Android assets..."
 
-            mkdir -p android/app/src/main/res/drawable
-
-            cp \
-              icon-source \
-              android/app/src/main/res/drawable/app_icon.png
-
-          fi
+          find android/app/src/main/assets -type f | head -50
 
 
-      - name: Configure Splash
-        run: |
-
-          if [ -f "splash-source" ]; then
-
-            mkdir -p android/app/src/main/res/drawable
-
-            cp \
-              splash-source \
-              android/app/src/main/res/drawable/splash_custom.png
-
-          fi
-
+      # =========================
+      # 12. ساخت APK
+      # =========================
 
       - name: Build APK
         working-directory: android
@@ -407,42 +171,50 @@ jobs:
 
           chmod +x gradlew
 
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
 
 
-      - name: Prepare APK and ZIP
+      # =========================
+      # 13. آماده کردن خروجی
+      # =========================
+
+      - name: Prepare Output
         run: |
 
           mkdir -p output
 
           cp \
             android/app/build/outputs/apk/debug/app-debug.apk \
-            output/app.apk
+            output/Custom-APK.apk
 
           cd output
 
           zip \
             Custom-APK.zip \
-            app.apk
+            Custom-APK.apk
 
+          echo "========== OUTPUT =========="
+
+          ls -lah
+
+
+      # =========================
+      # 14. تحویل APK
+      # =========================
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
-
         with:
-
           name: Custom-APK
+          path: output/Custom-APK.apk
 
-          path:
-            output/app.apk
 
+      # =========================
+      # 15. تحویل ZIP
+      # =========================
 
       - name: Upload ZIP
         uses: actions/upload-artifact@v4
-
         with:
-
           name: Custom-APK-ZIP
-
-          path:
-            output/Custom-APK.zip
+          path: output/Custom-APK.zip
