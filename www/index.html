@@ -7,7 +7,7 @@
 
 <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
 >
 
 <title>APK Builder</title>
@@ -20,35 +20,32 @@
 
 body{
     margin:0;
-    font-family:Tahoma,Arial,sans-serif;
     background:#080d1a;
     color:white;
+    font-family:Tahoma,Arial,sans-serif;
 }
 
 header{
-    padding:30px 20px;
+    padding:30px 18px;
     text-align:center;
-    background:linear-gradient(
-        135deg,
-        #101a3a,
-        #18265c
-    );
+    background:linear-gradient(135deg,#111a3b,#1b2b63);
 }
 
 .logo{
-    font-size:32px;
+    font-size:34px;
     font-weight:900;
 }
 
 .subtitle{
-    margin-top:8px;
-    color:#b8c2df;
+    margin-top:10px;
+    color:#b9c4e5;
+    font-size:14px;
 }
 
 .container{
     max-width:850px;
     margin:auto;
-    padding:20px;
+    padding:18px;
 }
 
 .card{
@@ -56,17 +53,18 @@ header{
     border:1px solid #29375f;
     border-radius:20px;
     padding:20px;
-    margin-bottom:18px;
+    margin-bottom:16px;
 }
 
 h2{
     margin-top:0;
+    font-size:22px;
 }
 
 label{
     display:block;
     margin:15px 0 7px;
-    color:#c0c9df;
+    color:#c2cbe3;
 }
 
 input,
@@ -82,20 +80,27 @@ textarea{
 }
 
 textarea{
-    min-height:160px;
+    min-height:180px;
     resize:vertical;
+    direction:ltr;
+    text-align:left;
+}
+
+input:focus,
+textarea:focus{
+    border-color:#607cff;
 }
 
 button{
     width:100%;
     border:0;
-    border-radius:14px;
     padding:15px;
-    margin-top:12px;
+    border-radius:13px;
     background:#526ff5;
     color:white;
-    font-size:17px;
-    font-weight:bold;
+    font-size:16px;
+    cursor:pointer;
+    margin-top:12px;
 }
 
 button:active{
@@ -107,41 +112,59 @@ button:active{
 }
 
 .file-box{
-    border:2px dashed #3d4d80;
+    border:2px dashed #3b4d80;
     border-radius:15px;
-    padding:25px;
+    padding:20px;
     text-align:center;
-    margin-top:10px;
+    margin-top:8px;
+}
+
+.file-box input{
+    border:0;
+    padding:5px;
+    background:transparent;
 }
 
 .preview{
-    width:100%;
-    max-height:220px;
-    object-fit:contain;
-    margin-top:15px;
-    border-radius:15px;
     display:none;
+    margin-top:12px;
+    text-align:center;
+}
+
+.preview img{
+    max-width:150px;
+    max-height:150px;
+    border-radius:18px;
+    border:1px solid #3b4d80;
 }
 
 .status{
     margin-top:15px;
     padding:15px;
     border-radius:13px;
-    background:#080d1a;
+    background:#080e20;
     border:1px solid #29375f;
-    line-height:1.9;
+    line-height:1.8;
+    color:#c5cde2;
 }
 
-.output{
-    display:none;
-}
-
-.download{
-    background:#00b978;
+.success{
+    color:#62e6a3;
 }
 
 .warning{
     color:#ffd166;
+}
+
+footer{
+    text-align:center;
+    padding:30px;
+    color:#65729a;
+    font-size:12px;
+}
+
+.hidden{
+    display:none;
 }
 
 </style>
@@ -159,7 +182,7 @@ button:active{
     </div>
 
     <div class="subtitle">
-        تبدیل سایت و HTML به برنامه اندروید
+        تبدیل HTML یا سایت به برنامه اندروید
     </div>
 
 </header>
@@ -168,13 +191,16 @@ button:active{
 <main class="container">
 
 
-<!-- اطلاعات برنامه -->
+<!-- =========================
+     APP INFORMATION
+========================= -->
 
-<div class="card">
+<section class="card">
 
     <h2>
         📱 اطلاعات برنامه
     </h2>
+
 
     <label>
         نام برنامه
@@ -183,8 +209,33 @@ button:active{
     <input
         id="appName"
         type="text"
-        placeholder="مثلاً ماشین حساب من"
+        placeholder="مثلاً My Calculator"
     >
+
+
+    <label>
+        شناسه برنامه
+    </label>
+
+    <input
+        id="appId"
+        type="text"
+        placeholder="com.example.myapp"
+        value="com.custom.apk"
+    >
+
+</section>
+
+
+<!-- =========================
+     WEBSITE
+========================= -->
+
+<section class="card">
+
+    <h2>
+        🌐 محتوای برنامه
+    </h2>
 
 
     <label>
@@ -199,7 +250,7 @@ button:active{
 
 
     <label>
-        یا کد HTML
+        یا کد کامل HTML
     </label>
 
     <textarea
@@ -207,165 +258,192 @@ button:active{
         placeholder="کد HTML خودت را اینجا قرار بده..."
     ></textarea>
 
-</div>
+
+    <div class="status">
+
+        اگر HTML وارد شود،
+        اولویت با HTML خواهد بود.
+
+        <br>
+
+        اگر HTML خالی باشد،
+        لینک سایت استفاده می‌شود.
+
+    </div>
+
+</section>
 
 
-<!-- لوگو -->
+<!-- =========================
+     ICON
+========================= -->
 
-<div class="card">
+<section class="card">
 
     <h2>
-        🖼️ لوگوی برنامه
+        🎨 لوگوی برنامه
     </h2>
 
+
     <div class="file-box">
+
+        <div>
+            انتخاب تصویر لوگو
+        </div>
 
         <input
             id="iconFile"
             type="file"
-            accept="image/png,image/jpeg,image/webp"
-        >
-
-        <img
-            id="iconPreview"
-            class="preview"
+            accept="image/*"
         >
 
     </div>
 
-</div>
 
-
-<!-- صفحه ورود -->
-
-<div class="card">
-
-    <h2>
-        🚀 صفحه ورود
-    </h2>
-
-    <label>
-        متن صفحه ورود
-    </label>
-
-    <input
-        id="splashText"
-        type="text"
-        placeholder="مثلاً خوش آمدید"
+    <div
+        id="iconPreview"
+        class="preview"
     >
 
+        <img id="iconPreviewImage">
 
-    <label>
-        تصویر صفحه ورود
-    </label>
+    </div>
+
+</section>
+
+
+<!-- =========================
+     SPLASH
+========================= -->
+
+<section class="card">
+
+    <h2>
+        🚀 تصویر هنگام ورود
+    </h2>
+
 
     <div class="file-box">
+
+        <div>
+            انتخاب تصویر Splash
+        </div>
 
         <input
             id="splashFile"
             type="file"
-            accept="image/png,image/jpeg,image/webp"
-        >
-
-        <img
-            id="splashPreview"
-            class="preview"
+            accept="image/*"
         >
 
     </div>
 
-</div>
+
+    <div
+        id="splashPreview"
+        class="preview"
+    >
+
+        <img id="splashPreviewImage">
+
+    </div>
+
+</section>
 
 
-<!-- ساخت -->
+<!-- =========================
+     CREATE CONFIG
+========================= -->
 
-<div class="card">
+<section class="card">
 
     <h2>
-        🔨 ساخت APK
+        ⚙️ آماده‌سازی پروژه
     </h2>
 
-    <p>
-        اطلاعات برنامه آماده ساخت است.
-    </p>
+
+    <div class="status">
+
+        اطلاعات بالا در یک فایل
+        <b>build-config.json</b>
+        ذخیره می‌شود.
+
+        <br><br>
+
+        این فایل در مرحله بعد توسط
+        GitHub Actions برای ساخت APK
+        استفاده خواهد شد.
+
+    </div>
+
 
     <button
-        onclick="prepareBuild()"
+        onclick="createConfig()"
     >
-        🚀 آماده‌سازی APK
+        📦 ساخت build-config.json
+    </button>
+
+
+    <button
+        class="secondary"
+        onclick="clearForm()"
+    >
+        🗑️ پاک کردن اطلاعات
     </button>
 
 
     <div
-        id="status"
-        class="status"
-    >
-        هنوز ساخت APK شروع نشده است.
-    </div>
+        id="result"
+        class="status hidden"
+    ></div>
 
-</div>
-
-
-<!-- خروجی -->
-
-<div
-    id="output"
-    class="card output"
->
-
-    <h2>
-        ✅ APK آماده شد
-    </h2>
-
-    <button
-        class="download"
-        onclick="downloadAPK()"
-    >
-        📦 دریافت APK
-    </button>
-
-
-    <button
-        class="download"
-        onclick="downloadZIP()"
-    >
-        🗜️ دریافت ZIP
-    </button>
-
-</div>
+</section>
 
 
 </main>
 
 
+<footer>
+
+    APK Builder v2.0
+
+</footer>
+
+
 <script>
 
 
-let iconData = null;
-let splashData = null;
+/* ==========================================
+   FILE TO BASE64
+========================================== */
 
-
-/* =========================
-   تبدیل فایل به Base64
-========================= */
-
-function readFile(file){
+function fileToBase64(file){
 
     return new Promise(
         (resolve,reject)=>{
 
+            if(!file){
+
+                resolve("");
+
+                return;
+            }
+
+
             const reader =
                 new FileReader();
 
-            reader.onload =
-                ()=>{
-                    resolve(
-                        reader.result
-                    );
-                };
 
-            reader.onerror =
-                reject;
+            reader.onload = () => {
+
+                resolve(
+                    reader.result
+                );
+
+            };
+
+
+            reader.onerror = reject;
+
 
             reader.readAsDataURL(file);
 
@@ -375,79 +453,77 @@ function readFile(file){
 }
 
 
-/* =========================
-   لوگو
-========================= */
+/* ==========================================
+   IMAGE PREVIEW
+========================================== */
 
-document
-.getElementById("iconFile")
-.addEventListener(
-    "change",
-    async function(){
+function setupPreview(
+    inputId,
+    previewId,
+    imageId
+){
 
-        const file =
-            this.files[0];
+    const input =
+        document.getElementById(inputId);
 
-        if(!file)
-            return;
+    const preview =
+        document.getElementById(previewId);
 
-        iconData =
-            await readFile(file);
+    const image =
+        document.getElementById(imageId);
 
-        const preview =
-            document.getElementById(
-                "iconPreview"
-            );
 
-        preview.src =
-            iconData;
+    input.addEventListener(
+        "change",
+        () => {
 
-        preview.style.display =
-            "block";
+            const file =
+                input.files[0];
 
-    }
+
+            if(!file){
+
+                preview.style.display =
+                    "none";
+
+                return;
+            }
+
+
+            const url =
+                URL.createObjectURL(file);
+
+
+            image.src = url;
+
+            preview.style.display =
+                "block";
+
+        }
+    );
+
+}
+
+
+setupPreview(
+    "iconFile",
+    "iconPreview",
+    "iconPreviewImage"
 );
 
 
-/* =========================
-   تصویر ورود
-========================= */
-
-document
-.getElementById("splashFile")
-.addEventListener(
-    "change",
-    async function(){
-
-        const file =
-            this.files[0];
-
-        if(!file)
-            return;
-
-        splashData =
-            await readFile(file);
-
-        const preview =
-            document.getElementById(
-                "splashPreview"
-            );
-
-        preview.src =
-            splashData;
-
-        preview.style.display =
-            "block";
-
-    }
+setupPreview(
+    "splashFile",
+    "splashPreview",
+    "splashPreviewImage"
 );
 
 
-/* =========================
-   آماده‌سازی
-========================= */
+/* ==========================================
+   CREATE CONFIG
+========================================== */
 
-function prepareBuild(){
+async function createConfig(){
 
     const appName =
         document
@@ -455,132 +531,296 @@ function prepareBuild(){
         .value
         .trim();
 
+
+    const appId =
+        document
+        .getElementById("appId")
+        .value
+        .trim();
+
+
     const siteUrl =
         document
         .getElementById("siteUrl")
         .value
         .trim();
 
+
     const htmlCode =
         document
         .getElementById("htmlCode")
-        .value
-        .trim();
+        .value;
 
-    const splashText =
+
+    const iconFile =
         document
-        .getElementById("splashText")
-        .value
-        .trim();
+        .getElementById("iconFile")
+        .files[0];
+
+
+    const splashFile =
+        document
+        .getElementById("splashFile")
+        .files[0];
+
+
+    const result =
+        document
+        .getElementById("result");
+
+
+    /* =========================
+       VALIDATION
+    ========================= */
 
 
     if(!appName){
 
-        alert(
-            "نام برنامه را وارد کن."
+        showResult(
+            "❌ لطفاً نام برنامه را وارد کن.",
+            false
         );
 
         return;
-
     }
 
 
-    if(!siteUrl && !htmlCode){
+    if(!appId){
 
-        alert(
-            "لینک سایت یا HTML را وارد کن."
+        showResult(
+            "❌ شناسه برنامه را وارد کن.",
+            false
         );
 
         return;
-
     }
 
 
-    const data = {
+    if(!htmlCode.trim() && !siteUrl){
+
+        showResult(
+            "❌ باید HTML یا لینک سایت وارد شود.",
+            false
+        );
+
+        return;
+    }
+
+
+    /* =========================
+       READ IMAGES
+    ========================= */
+
+    let icon = "";
+
+    let splash = "";
+
+
+    try{
+
+        icon =
+            await fileToBase64(
+                iconFile
+            );
+
+
+        splash =
+            await fileToBase64(
+                splashFile
+            );
+
+    }catch(error){
+
+        showResult(
+            "❌ خطا در خواندن تصویر.",
+            false
+        );
+
+        return;
+    }
+
+
+    /* =========================
+       CONFIG
+    ========================= */
+
+    const config = {
 
         appName:
             appName,
 
-        siteUrl:
-            siteUrl,
+        appId:
+            appId,
 
         htmlCode:
             htmlCode,
 
-        splashText:
-            splashText,
+        siteUrl:
+            siteUrl,
 
         icon:
-            iconData,
+            icon,
 
         splash:
-            splashData
+            splash,
+
+        version:
+            "1.0.0"
 
     };
 
 
-    localStorage.setItem(
-        "apkBuilderProject",
-        JSON.stringify(data)
+    /* =========================
+       CREATE JSON
+    ========================= */
+
+    const json =
+        JSON.stringify(
+            config,
+            null,
+            2
+        );
+
+
+    const blob =
+        new Blob(
+            [json],
+            {
+                type:
+                    "application/json"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href = url;
+
+    link.download =
+        "build-config.json";
+
+
+    document.body.appendChild(
+        link
     );
 
 
+    link.click();
+
+
+    link.remove();
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+
+    showResult(
+        "✅ فایل build-config.json ساخته شد و دانلود آن آغاز شد.",
+        true
+    );
+
+}
+
+
+/* ==========================================
+   RESULT
+========================================== */
+
+function showResult(
+    message,
+    success
+){
+
+    const result =
+        document
+        .getElementById("result");
+
+
+    result.classList.remove(
+        "hidden"
+    );
+
+
+    result.className =
+        success
+        ? "status success"
+        : "status warning";
+
+
+    result.innerHTML =
+        message;
+
+}
+
+
+/* ==========================================
+   CLEAR
+========================================== */
+
+function clearForm(){
+
     document
-    .getElementById("status")
-    .innerHTML =
-
-        "✅ اطلاعات برنامه ذخیره شد.<br><br>" +
-
-        "نام: " +
-        appName +
-        "<br>" +
-
-        "لینک: " +
-        (
-            siteUrl ||
-            "HTML سفارشی"
-        ) +
-
-        "<br><br>" +
-
-        "<span class='warning'>" +
-        "مرحله بعد: ارسال اطلاعات به GitHub Actions و ساخت APK." +
-        "</span>";
+    .getElementById("appName")
+    .value = "";
 
 
     document
-    .getElementById("output")
+    .getElementById("appId")
+    .value =
+        "com.custom.apk";
+
+
+    document
+    .getElementById("siteUrl")
+    .value = "";
+
+
+    document
+    .getElementById("htmlCode")
+    .value = "";
+
+
+    document
+    .getElementById("iconFile")
+    .value = "";
+
+
+    document
+    .getElementById("splashFile")
+    .value = "";
+
+
+    document
+    .getElementById("iconPreview")
     .style.display =
-        "block";
-
-}
+        "none";
 
 
-/* =========================
-   دانلود APK
-========================= */
+    document
+    .getElementById("splashPreview")
+    .style.display =
+        "none";
 
-function downloadAPK(){
 
-    alert(
-        "بعد از اتصال GitHub Actions، APK واقعی از این قسمت دریافت می‌شود."
+    document
+    .getElementById("result")
+    .classList.add(
+        "hidden"
     );
 
 }
-
-
-/* =========================
-   دانلود ZIP
-========================= */
-
-function downloadZIP(){
-
-    alert(
-        "بعد از اتصال GitHub Actions، ZIP شامل APK از این قسمت دریافت می‌شود."
-    );
-
-}
-
 
 </script>
 
