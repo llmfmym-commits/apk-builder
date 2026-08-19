@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>APK Builder</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Tahoma,Arial,sans-serif;
+    background:#080d1a;
+    color:#fff;
+}
+
+header{
+    padding:30px 20px;
+    text-align:center;
+    background:linear-gradient(135deg,#101a3a,#18265c);
+}
+
+.logo{
+    font-size:32px;
+    font-weight:900;
+}
+
+.subtitle{
+    margin-top:10px;
+    color:#b8c2df;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:#111a32;
+    border:1px solid #29375f;
+    border-radius:20px;
+    padding:20px;
+    margin-bottom:15px;
+}
+
+h2{
+    margin-top:0;
+}
+
+label{
+    display:block;
+    margin:15px 0 7px;
+    color:#bbc5df;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:1px solid #3a4772;
+    background:#080d1a;
+    color:white;
+    font-size:16px;
+    outline:none;
+}
+
+textarea{
+    min-height:150px;
+    resize:vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:#526ff5;
+}
+
+.mode{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:10px;
+}
+
+.mode button{
+    background:#252f4e;
+}
+
+.mode button.active{
+    background:#526ff5;
+}
+
+button{
+    width:100%;
+    border:0;
+    padding:15px;
+    border-radius:13px;
+    background:#526ff5;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+button:active{
+    transform:scale(.98);
+}
+
+.file-box{
+    border:2px dashed #3a4772;
+    border-radius:15px;
+    padding:25px;
+    text-align:center;
+    cursor:pointer;
+}
+
+.file-box:hover{
+    border-color:#526ff5;
+}
+
+.preview{
+    margin-top:15px;
+    text-align:center;
+}
+
+.preview img{
+    width:90px;
+    height:90px;
+    object-fit:cover;
+    border-radius:20px;
+    border:2px solid #3a4772;
+}
+
+.status{
+    margin-top:15px;
+    padding:15px;
+    border-radius:12px;
+    background:#080e20;
+    border:1px solid #29375f;
+    text-align:center;
+    color:#b8c2df;
+    display:none;
+}
+
+.hidden{
+    display:none!important;
+}
+
+.info{
+    color:#8f9bbc;
+    font-size:13px;
+    line-height:1.8;
+}
+
+footer{
+    text-align:center;
+    padding:30px;
+    color:#65729a;
+    font-size:12px;
+}
+
+@media(max-width:500px){
+    .container{
+        padding:12px;
+    }
+
+    .mode{
+        grid-template-columns:1fr 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        📱 APK Builder
+    </div>
+
+    <div class="subtitle">
+        تبدیل HTML و سایت به برنامه اندروید
+    </div>
+
+</header>
+
+
+<main class="container">
+
+
+<!-- ================= APP INFO ================= -->
+
+<div class="card">
+
+    <h2>⚙️ اطلاعات برنامه</h2>
+
+    <label>
+        نام برنامه
+    </label>
+
+    <input
+        id="appName"
+        type="text"
+        placeholder="مثلاً فروشگاه من"
+        maxlength="30"
+    >
+
+
+    <label>
+        شناسه برنامه
+    </label>
+
+    <input
+        id="packageName"
+        type="text"
+        placeholder="com.example.myapp"
+        value="com.example.myapp"
+    >
+
+    <div class="info">
+        شناسه باید به شکل com.example.app باشد.
+    </div>
+
+</div>
+
+
+<!-- ================= SOURCE ================= -->
+
+<div class="card">
+
+    <h2>🌐 محتوای برنامه</h2>
+
+    <div class="mode">
+
+        <button
+            id="urlMode"
+            class="active"
+            onclick="selectMode('url')"
+        >
+            🌐 لینک سایت
+        </button>
+
+        <button
+            id="htmlMode"
+            onclick="selectMode('html')"
+        >
+            📄 فایل HTML
+        </button>
+
+    </div>
+
+
+    <div id="urlBox">
+
+        <label>
+            آدرس سایت
+        </label>
+
+        <input
+            id="siteUrl"
+            type="url"
+            placeholder="https://example.com"
+        >
+
+    </div>
+
+
+    <div id="htmlBox" class="hidden">
+
+        <label>
+            فایل HTML
+        </label>
+
+        <div
+            class="file-box"
+            onclick="document.getElementById('htmlFile').click()"
+        >
+            📄
+            <br>
+            برای انتخاب فایل HTML کلیک کنید
+
+            <input
+                id="htmlFile"
+                type="file"
+                accept=".html,.htm"
+                class="hidden"
+                onchange="showFileName()"
+            >
+
+            <div id="fileName">
+                هنوز فایلی انتخاب نشده
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================= ICON ================= -->
+
+<div class="card">
+
+    <h2>🖼️ آیکون برنامه</h2>
+
+    <div
+        class="file-box"
+        onclick="document.getElementById('iconFile').click()"
+    >
+
+        انتخاب تصویر آیکون
+
+        <input
+            id="iconFile"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            class="hidden"
+            onchange="previewIcon(event)"
+        >
+
+    </div>
+
+
+    <div
+        id="iconPreview"
+        class="preview hidden"
+    >
+
+        <img id="iconImage">
+
+    </div>
+
+</div>
+
+
+<!-- ================= SPLASH ================= -->
+
+<div class="card">
+
+    <h2>🚀 صفحه ورود</h2>
+
+    <label>
+        متن صفحه ورود
+    </label>
+
+    <input
+        id="splashText"
+        type="text"
+        placeholder="مثلاً در حال آماده‌سازی..."
+    >
+
+
+    <label>
+        تصویر صفحه ورود
+    </label>
+
+    <div
+        class="file-box"
+        onclick="document.getElementById('splashFile').click()"
+    >
+
+        انتخاب تصویر
+
+        <input
+            id="splashFile"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            class="hidden"
+        >
+
+    </div>
+
+</div>
+
+
+<!-- ================= BUILD ================= -->
+
+<div class="card">
+
+    <h2>🔨 ساخت APK</h2>
+
+    <p class="info">
+        بعد از تکمیل اطلاعات، پروژه برای ساخت APK آماده می‌شود.
+    </p>
+
+    <button onclick="startBuild()">
+        🚀 ساخت APK
+    </button>
+
+
+    <div
+        id="status"
+        class="status"
+    ></div>
+
+</div>
+
+
+</main>
+
+
+<footer>
+    APK Builder v1.0
+</footer>
+
+
+<script>
+
+let buildMode = "url";
+
+
+/* ================= MODE ================= */
+
+function selectMode(mode){
+
+    buildMode = mode;
+
+    const urlBox =
+        document.getElementById("urlBox");
+
+    const htmlBox =
+        document.getElementById("htmlBox");
+
+    const urlMode =
+        document.getElementById("urlMode");
+
+    const htmlMode =
+        document.getElementById("htmlMode");
+
+
+    if(mode === "url"){
+
+        urlBox.classList.remove("hidden");
+
+        htmlBox.classList.add("hidden");
+
+        urlMode.classList.add("active");
+
+        htmlMode.classList.remove("active");
+
+    }else{
+
+        urlBox.classList.add("hidden");
+
+        htmlBox.classList.remove("hidden");
+
+        urlMode.classList.remove("active");
+
+        htmlMode.classList.add("active");
+
+    }
+
+}
+
+
+/* ================= FILE ================= */
+
+function showFileName(){
+
+    const file =
+        document.getElementById("htmlFile").files[0];
+
+    const output =
+        document.getElementById("fileName");
+
+
+    if(file){
+
+        output.textContent =
+            "فایل انتخاب شد: " + file.name;
+
+    }
+
+}
+
+
+/* ================= ICON ================= */
+
+function previewIcon(event){
+
+    const file =
+        event.target.files[0];
+
+    if(!file) return;
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload = function(e){
+
+        document
+            .getElementById("iconImage")
+            .src = e.target.result;
+
+        document
+            .getElementById("iconPreview")
+            .classList.remove("hidden");
+
+    };
+
+
+    reader.readAsDataURL(file);
+
+}
+
+
+/* ================= VALIDATION ================= */
+
+function validate(){
+
+    const name =
+        document.getElementById("appName")
+        .value
+        .trim();
+
+
+    const packageName =
+        document.getElementById("packageName")
+        .value
+        .trim();
+
+
+    if(!name){
+
+        alert("لطفاً نام برنامه را وارد کنید.");
+
+        return false;
+
+    }
+
+
+    const packageRegex =
+        /^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)+$/;
+
+
+    if(!packageRegex.test(packageName)){
+
+        alert(
+            "شناسه برنامه صحیح نیست.\nمثال:\ncom.example.myapp"
+        );
+
+        return false;
+
+    }
+
+
+    if(buildMode === "url"){
+
+        const url =
+            document.getElementById("siteUrl")
+            .value
+            .trim();
+
+
+        if(!url){
+
+            alert("لطفاً آدرس سایت را وارد کنید.");
+
+            return false;
+
+        }
+
+
+        if(
+            !url.startsWith("http://") &&
+            !url.startsWith("https://")
+        ){
+
+            alert(
+                "آدرس باید با http:// یا https:// شروع شود."
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+    if(buildMode === "html"){
+
+        const file =
+            document.getElementById("htmlFile")
+            .files[0];
+
+
+        if(!file){
+
+            alert("لطفاً فایل HTML را انتخاب کنید.");
+
+            return false;
+
+        }
+
+    }
+
+
+    return true;
+
+}
+
+
+/* ================= BUILD ================= */
+
+function startBuild(){
+
+    if(!validate()) return;
+
+
+    const status =
+        document.getElementById("status");
+
+
+    status.style.display = "block";
+
+
+    status.innerHTML =
+        "⏳ اطلاعات بررسی شد.<br><br>" +
+        "🔧 آماده‌سازی پروژه APK...";
+
+
+    /*
+       فعلاً Build واقعی اینجا متصل نشده است.
+       در مرحله بعد GitHub Actions را به این قسمت
+       متصل می‌کنیم.
+    */
+
+
+    setTimeout(function(){
+
+        status.innerHTML =
+            "✅ اطلاعات برنامه آماده است.<br><br>" +
+            "مرحله بعد: اتصال به GitHub Actions";
+
+    },1500);
+
+}
+
+</script>
+
+</body>
+      </html>
