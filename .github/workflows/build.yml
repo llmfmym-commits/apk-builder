@@ -1,21 +1,7 @@
-name: Build APK Builder
+name: Build Custom APK
 
 on:
   workflow_dispatch:
-    inputs:
-      app_name:
-        description: "App name"
-        required: true
-        default: "My App"
-
-      site_url:
-        description: "Website URL"
-        required: true
-        default: "https://example.com"
-
-  push:
-    branches:
-      - main
 
 permissions:
   contents: read
@@ -32,73 +18,133 @@ jobs:
         uses: actions/checkout@v4
 
 
-      - name: Setup Java 21
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
 
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
 
 
-      - name: Configure app
-        env:
-          INPUT_APP_NAME: ${{ github.event.inputs.app_name }}
-          INPUT_SITE_URL: ${{ github.event.inputs.site_url }}
+      - name: Read Build Configuration
         run: |
 
           python3 <<'PY'
 
-          import os
           import json
           from pathlib import Path
 
-          app_name = os.environ.get(
-              "INPUT_APP_NAME"
-          ) or "APK Builder"
+          config_file = Path("build-config.json")
 
-          site_url = os.environ.get(
-              "INPUT_SITE_URL"
-          ) or "https://example.com"
-
-          app_name = app_name.strip()
-          site_url = site_url.strip()
-
-          if not app_name:
-              app_name = "APK Builder"
-
-          if not site_url.startswith("http://") and not site_url.startswith("https://"):
+          if not config_file.exists():
               raise SystemExit(
-                  "Invalid URL. URL must start with http:// or https://"
+                  "build-config.json not found"
               )
 
-          config = {
-              "appId": "com.apkbuilder.generated",
-              "appName": app_name,
-              "webDir": "www",
-              "bundledWebRuntime": False
-          }
-
-          Path("capacitor.config.json").write_text(
-              json.dumps(
-                  config,
-                  ensure_ascii=False,
-                  indent=2
-              ),
-              encoding="utf-8"
+          config = json.loads(
+              config_file.read_text(
+                  encoding="utf-8"
+              )
           )
 
-          html = f"""<!DOCTYPE html>
-          <html lang="fa">
+          app_name = config.get(
+              "appName",
+              "My App"
+          )
+
+          print(
+              "Building:",
+              app_name
+          )
+
+          PY
+
+
+      - name: Create package.json
+        run: |
+
+          cat > package.json <<'JSON'
+
+          {
+            "name": "custom-apk-builder",
+            "version": "1.0.0",
+            "private": true,
+            "scripts": {
+              "build": "echo build"
+            },
+            "dependencies": {
+              "@capacitor/core": "^7.4.0",
+              "@capacitor/android": "^7.4.0",
+              "@capacitor/cli": "^7.4.0"
+            }
+          }
+
+          JSON
+
+
+      - name: Install Capacitor
+        run: npm install
+
+
+      - name: Prepare Website
+        run: |
+
+          mkdir -p www
+
+          python3 <<'PY'
+
+          import json
+          import base64
+          from pathlib import Path
+
+          config = json.loads(
+              Path("build-config.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          app_name = config.get(
+              "appName",
+              "My App"
+          )
+
+          html = config.get(
+              "htmlCode",
+              ""
+          )
+
+          site_url = config.get(
+              "siteUrl",
+              ""
+          )
+
+          splash_text = config.get(
+              "splashText",
+              ""
+          )
+
+
+          # اگر HTML وجود نداشته باشد،
+          # از لینک سایت استفاده می‌کنیم.
+
+          if html.strip():
+
+              final_html = html
+
+          elif site_url.strip():
+
+              final_html = f"""<!DOCTYPE html>
+          <html>
           <head>
           <meta charset="UTF-8">
           <meta
               name="viewport"
-              content="width=device-width,initial-scale=1.0"
+              content="width=device-width,initial-scale=1"
           >
           <title>{app_name}</title>
 
@@ -109,7 +155,6 @@ jobs:
               width:100%;
               height:100%;
               overflow:hidden;
-              background:#ffffff;
           }}
 
           iframe {{
@@ -125,34 +170,155 @@ jobs:
 
           <iframe
               src="{site_url}"
-              allow="fullscreen"
           ></iframe>
 
           </body>
           </html>
           """
 
-          Path("www").mkdir(
-              parents=True,
-              exist_ok=True
-          )
+          else:
 
-          Path("www/index.html").write_text(
-              html,
+              final_html = f"""<!DOCTYPE html>
+          <html lang="fa" dir="rtl">
+          <body>
+          <h1>{app_name}</h1>
+          <p>هیچ HTML یا لینکی وارد نشده است.</p>
+          </body>
+          </html>
+          """
+
+
+          Path(
+              "www/index.html"
+          ).write_text(
+              final_html,
               encoding="utf-8"
           )
 
-          print("App name:", app_name)
-          print("Website:", site_url)
+
+          # تصویر لوگو
+
+          icon_data = config.get(
+              "icon",
+              ""
+          )
+
+          if icon_data:
+
+              try:
+
+                  header, data = icon_data.split(
+                      ",",
+                      1
+                  )
+
+                  image_bytes = base64.b64decode(
+                      data
+                  )
+
+                  Path(
+                      "icon-source"
+                  ).write_bytes(
+                      image_bytes
+                  )
+
+              except Exception as e:
+
+                  print(
+                      "Icon error:",
+                      e
+                  )
+
+
+          # تصویر Splash
+
+          splash_data = config.get(
+              "splash",
+              ""
+          )
+
+          if splash_data:
+
+              try:
+
+                  header, data = splash_data.split(
+                      ",",
+                      1
+                  )
+
+                  image_bytes = base64.b64decode(
+                      data
+                  )
+
+                  Path(
+                      "splash-source"
+                  ).write_bytes(
+                      image_bytes
+                  )
+
+              except Exception as e:
+
+                  print(
+                      "Splash error:",
+                      e
+                  )
+
 
           PY
 
 
-      - name: Install dependencies
-        run: npm install
+      - name: Create Capacitor Config
+        run: |
+
+          python3 <<'PY'
+
+          import json
+          from pathlib import Path
+
+          config = json.loads(
+              Path("build-config.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          app_name = config.get(
+              "appName",
+              "My App"
+          )
+
+          capacitor = {
+
+              "appId":
+                  "com.apkbuilder.generated",
+
+              "appName":
+                  app_name,
+
+              "webDir":
+                  "www",
+
+              "bundledWebRuntime":
+                  False
+
+          }
+
+          Path(
+              "capacitor.config.json"
+          ).write_text(
+
+              json.dumps(
+                  capacitor,
+                  ensure_ascii=False,
+                  indent=2
+              ),
+
+              encoding="utf-8"
+          )
+
+          PY
 
 
-      - name: Initialize Capacitor
+      - name: Add Android
         run: npx cap add android
 
 
@@ -160,44 +326,79 @@ jobs:
         run: npx cap sync android
 
 
-      - name: Set Android app name
-        env:
-          INPUT_APP_NAME: ${{ github.event.inputs.app_name }}
+      - name: Configure Android App Name
         run: |
 
           python3 <<'PY'
 
-          import os
+          import json
+          import re
           from pathlib import Path
 
-          app_name = os.environ.get(
-              "INPUT_APP_NAME"
-          ) or "APK Builder"
+          config = json.loads(
+              Path("build-config.json").read_text(
+                  encoding="utf-8"
+              )
+          )
 
-          path = Path(
+          app_name = config.get(
+              "appName",
+              "My App"
+          )
+
+
+          strings = Path(
               "android/app/src/main/res/values/strings.xml"
           )
 
-          if path.exists():
+          if strings.exists():
 
-              text = path.read_text(
+              text = strings.read_text(
                   encoding="utf-8"
               )
 
-              import re
-
               text = re.sub(
                   r'<string name="app_name">.*?</string>',
-                  f'<string name="app_name">{app_name}</string>',
+                  '<string name="app_name">'
+                  + app_name
+                  + '</string>',
                   text
               )
 
-              path.write_text(
+              strings.write_text(
                   text,
                   encoding="utf-8"
               )
 
           PY
+
+
+      - name: Configure Icon
+        run: |
+
+          if [ -f "icon-source" ]; then
+
+            mkdir -p android/app/src/main/res/drawable
+
+            cp \
+              icon-source \
+              android/app/src/main/res/drawable/app_icon.png
+
+          fi
+
+
+      - name: Configure Splash
+        run: |
+
+          if [ -f "splash-source" ]; then
+
+            mkdir -p android/app/src/main/res/drawable
+
+            cp \
+              splash-source \
+              android/app/src/main/res/drawable/splash_custom.png
+
+          fi
 
 
       - name: Build APK
@@ -209,29 +410,39 @@ jobs:
           ./gradlew assembleDebug
 
 
-      - name: Prepare output
+      - name: Prepare APK and ZIP
         run: |
 
           mkdir -p output
 
           cp \
             android/app/build/outputs/apk/debug/app-debug.apk \
-            output/APK-Builder.apk
+            output/app.apk
 
           cd output
 
-          zip APK-Builder.zip APK-Builder.apk
+          zip \
+            Custom-APK.zip \
+            app.apk
 
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+
         with:
-          name: APK-Builder-APK
-          path: output/APK-Builder.apk
+
+          name: Custom-APK
+
+          path:
+            output/app.apk
 
 
       - name: Upload ZIP
         uses: actions/upload-artifact@v4
+
         with:
-          name: APK-Builder-ZIP
-          path: output/APK-Builder.zip
+
+          name: Custom-APK-ZIP
+
+          path:
+            output/Custom-APK.zip
