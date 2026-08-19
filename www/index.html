@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>APK Builder</title>
 
 <style>
+
 *{
     box-sizing:border-box;
 }
@@ -15,13 +22,17 @@ body{
     margin:0;
     font-family:Tahoma,Arial,sans-serif;
     background:#080d1a;
-    color:#fff;
+    color:white;
 }
 
 header{
     padding:30px 20px;
     text-align:center;
-    background:linear-gradient(135deg,#101a3a,#18265c);
+    background:linear-gradient(
+        135deg,
+        #101a3a,
+        #18265c
+    );
 }
 
 .logo{
@@ -30,12 +41,12 @@ header{
 }
 
 .subtitle{
-    margin-top:10px;
+    margin-top:8px;
     color:#b8c2df;
 }
 
 .container{
-    max-width:700px;
+    max-width:850px;
     margin:auto;
     padding:20px;
 }
@@ -45,7 +56,7 @@ header{
     border:1px solid #29375f;
     border-radius:20px;
     padding:20px;
-    margin-bottom:15px;
+    margin-bottom:18px;
 }
 
 h2{
@@ -55,15 +66,14 @@ h2{
 label{
     display:block;
     margin:15px 0 7px;
-    color:#bbc5df;
+    color:#c0c9df;
 }
 
 input,
-select,
 textarea{
     width:100%;
     padding:14px;
-    border-radius:12px;
+    border-radius:13px;
     border:1px solid #3a4772;
     background:#080d1a;
     color:white;
@@ -72,122 +82,84 @@ textarea{
 }
 
 textarea{
-    min-height:150px;
+    min-height:160px;
     resize:vertical;
-}
-
-input:focus,
-select:focus,
-textarea:focus{
-    border-color:#526ff5;
-}
-
-.mode{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-    margin-bottom:10px;
-}
-
-.mode button{
-    background:#252f4e;
-}
-
-.mode button.active{
-    background:#526ff5;
 }
 
 button{
     width:100%;
     border:0;
+    border-radius:14px;
     padding:15px;
-    border-radius:13px;
+    margin-top:12px;
     background:#526ff5;
     color:white;
-    font-size:16px;
-    cursor:pointer;
-    margin-top:10px;
+    font-size:17px;
+    font-weight:bold;
 }
 
 button:active{
     transform:scale(.98);
 }
 
+.secondary{
+    background:#252f4e;
+}
+
 .file-box{
-    border:2px dashed #3a4772;
+    border:2px dashed #3d4d80;
     border-radius:15px;
     padding:25px;
     text-align:center;
-    cursor:pointer;
-}
-
-.file-box:hover{
-    border-color:#526ff5;
+    margin-top:10px;
 }
 
 .preview{
+    width:100%;
+    max-height:220px;
+    object-fit:contain;
     margin-top:15px;
-    text-align:center;
-}
-
-.preview img{
-    width:90px;
-    height:90px;
-    object-fit:cover;
-    border-radius:20px;
-    border:2px solid #3a4772;
+    border-radius:15px;
+    display:none;
 }
 
 .status{
     margin-top:15px;
     padding:15px;
-    border-radius:12px;
-    background:#080e20;
+    border-radius:13px;
+    background:#080d1a;
     border:1px solid #29375f;
-    text-align:center;
-    color:#b8c2df;
+    line-height:1.9;
+}
+
+.output{
     display:none;
 }
 
-.hidden{
-    display:none!important;
+.download{
+    background:#00b978;
 }
 
-.info{
-    color:#8f9bbc;
-    font-size:13px;
-    line-height:1.8;
+.warning{
+    color:#ffd166;
 }
 
-footer{
-    text-align:center;
-    padding:30px;
-    color:#65729a;
-    font-size:12px;
-}
-
-@media(max-width:500px){
-    .container{
-        padding:12px;
-    }
-
-    .mode{
-        grid-template-columns:1fr 1fr;
-    }
-}
 </style>
+
 </head>
 
+
 <body>
+
 
 <header>
 
     <div class="logo">
-        📱 APK Builder
+        🚀 APK Builder
     </div>
 
     <div class="subtitle">
-        تبدیل HTML و سایت به برنامه اندروید
+        تبدیل سایت و HTML به برنامه اندروید
     </div>
 
 </header>
@@ -196,11 +168,13 @@ footer{
 <main class="container">
 
 
-<!-- ================= APP INFO ================= -->
+<!-- اطلاعات برنامه -->
 
 <div class="card">
 
-    <h2>⚙️ اطلاعات برنامه</h2>
+    <h2>
+        📱 اطلاعات برنامه
+    </h2>
 
     <label>
         نام برنامه
@@ -209,144 +183,66 @@ footer{
     <input
         id="appName"
         type="text"
-        placeholder="مثلاً فروشگاه من"
-        maxlength="30"
+        placeholder="مثلاً ماشین حساب من"
     >
 
 
     <label>
-        شناسه برنامه
+        لینک سایت
     </label>
 
     <input
-        id="packageName"
-        type="text"
-        placeholder="com.example.myapp"
-        value="com.example.myapp"
+        id="siteUrl"
+        type="url"
+        placeholder="https://example.com"
     >
 
-    <div class="info">
-        شناسه باید به شکل com.example.app باشد.
-    </div>
+
+    <label>
+        یا کد HTML
+    </label>
+
+    <textarea
+        id="htmlCode"
+        placeholder="کد HTML خودت را اینجا قرار بده..."
+    ></textarea>
 
 </div>
 
 
-<!-- ================= SOURCE ================= -->
+<!-- لوگو -->
 
 <div class="card">
 
-    <h2>🌐 محتوای برنامه</h2>
+    <h2>
+        🖼️ لوگوی برنامه
+    </h2>
 
-    <div class="mode">
-
-        <button
-            id="urlMode"
-            class="active"
-            onclick="selectMode('url')"
-        >
-            🌐 لینک سایت
-        </button>
-
-        <button
-            id="htmlMode"
-            onclick="selectMode('html')"
-        >
-            📄 فایل HTML
-        </button>
-
-    </div>
-
-
-    <div id="urlBox">
-
-        <label>
-            آدرس سایت
-        </label>
-
-        <input
-            id="siteUrl"
-            type="url"
-            placeholder="https://example.com"
-        >
-
-    </div>
-
-
-    <div id="htmlBox" class="hidden">
-
-        <label>
-            فایل HTML
-        </label>
-
-        <div
-            class="file-box"
-            onclick="document.getElementById('htmlFile').click()"
-        >
-            📄
-            <br>
-            برای انتخاب فایل HTML کلیک کنید
-
-            <input
-                id="htmlFile"
-                type="file"
-                accept=".html,.htm"
-                class="hidden"
-                onchange="showFileName()"
-            >
-
-            <div id="fileName">
-                هنوز فایلی انتخاب نشده
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- ================= ICON ================= -->
-
-<div class="card">
-
-    <h2>🖼️ آیکون برنامه</h2>
-
-    <div
-        class="file-box"
-        onclick="document.getElementById('iconFile').click()"
-    >
-
-        انتخاب تصویر آیکون
+    <div class="file-box">
 
         <input
             id="iconFile"
             type="file"
             accept="image/png,image/jpeg,image/webp"
-            class="hidden"
-            onchange="previewIcon(event)"
         >
 
-    </div>
-
-
-    <div
-        id="iconPreview"
-        class="preview hidden"
-    >
-
-        <img id="iconImage">
+        <img
+            id="iconPreview"
+            class="preview"
+        >
 
     </div>
 
 </div>
 
 
-<!-- ================= SPLASH ================= -->
+<!-- صفحه ورود -->
 
 <div class="card">
 
-    <h2>🚀 صفحه ورود</h2>
+    <h2>
+        🚀 صفحه ورود
+    </h2>
 
     <label>
         متن صفحه ورود
@@ -355,7 +251,7 @@ footer{
     <input
         id="splashText"
         type="text"
-        placeholder="مثلاً در حال آماده‌سازی..."
+        placeholder="مثلاً خوش آمدید"
     >
 
 
@@ -363,18 +259,17 @@ footer{
         تصویر صفحه ورود
     </label>
 
-    <div
-        class="file-box"
-        onclick="document.getElementById('splashFile').click()"
-    >
-
-        انتخاب تصویر
+    <div class="file-box">
 
         <input
             id="splashFile"
             type="file"
             accept="image/png,image/jpeg,image/webp"
-            class="hidden"
+        >
+
+        <img
+            id="splashPreview"
+            class="preview"
         >
 
     </div>
@@ -382,25 +277,60 @@ footer{
 </div>
 
 
-<!-- ================= BUILD ================= -->
+<!-- ساخت -->
 
 <div class="card">
 
-    <h2>🔨 ساخت APK</h2>
+    <h2>
+        🔨 ساخت APK
+    </h2>
 
-    <p class="info">
-        بعد از تکمیل اطلاعات، پروژه برای ساخت APK آماده می‌شود.
+    <p>
+        اطلاعات برنامه آماده ساخت است.
     </p>
 
-    <button onclick="startBuild()">
-        🚀 ساخت APK
+    <button
+        onclick="prepareBuild()"
+    >
+        🚀 آماده‌سازی APK
     </button>
 
 
     <div
         id="status"
         class="status"
-    ></div>
+    >
+        هنوز ساخت APK شروع نشده است.
+    </div>
+
+</div>
+
+
+<!-- خروجی -->
+
+<div
+    id="output"
+    class="card output"
+>
+
+    <h2>
+        ✅ APK آماده شد
+    </h2>
+
+    <button
+        class="download"
+        onclick="downloadAPK()"
+    >
+        📦 دریافت APK
+    </button>
+
+
+    <button
+        class="download"
+        onclick="downloadZIP()"
+    >
+        🗜️ دریافت ZIP
+    </button>
 
 </div>
 
@@ -408,246 +338,253 @@ footer{
 </main>
 
 
-<footer>
-    APK Builder v1.0
-</footer>
-
-
 <script>
 
-let buildMode = "url";
+
+let iconData = null;
+let splashData = null;
 
 
-/* ================= MODE ================= */
+/* =========================
+   تبدیل فایل به Base64
+========================= */
 
-function selectMode(mode){
+function readFile(file){
 
-    buildMode = mode;
+    return new Promise(
+        (resolve,reject)=>{
 
-    const urlBox =
-        document.getElementById("urlBox");
+            const reader =
+                new FileReader();
 
-    const htmlBox =
-        document.getElementById("htmlBox");
+            reader.onload =
+                ()=>{
+                    resolve(
+                        reader.result
+                    );
+                };
 
-    const urlMode =
-        document.getElementById("urlMode");
+            reader.onerror =
+                reject;
 
-    const htmlMode =
-        document.getElementById("htmlMode");
+            reader.readAsDataURL(file);
 
-
-    if(mode === "url"){
-
-        urlBox.classList.remove("hidden");
-
-        htmlBox.classList.add("hidden");
-
-        urlMode.classList.add("active");
-
-        htmlMode.classList.remove("active");
-
-    }else{
-
-        urlBox.classList.add("hidden");
-
-        htmlBox.classList.remove("hidden");
-
-        urlMode.classList.remove("active");
-
-        htmlMode.classList.add("active");
-
-    }
+        }
+    );
 
 }
 
 
-/* ================= FILE ================= */
+/* =========================
+   لوگو
+========================= */
 
-function showFileName(){
+document
+.getElementById("iconFile")
+.addEventListener(
+    "change",
+    async function(){
 
-    const file =
-        document.getElementById("htmlFile").files[0];
+        const file =
+            this.files[0];
 
-    const output =
-        document.getElementById("fileName");
+        if(!file)
+            return;
+
+        iconData =
+            await readFile(file);
+
+        const preview =
+            document.getElementById(
+                "iconPreview"
+            );
+
+        preview.src =
+            iconData;
+
+        preview.style.display =
+            "block";
+
+    }
+);
 
 
-    if(file){
+/* =========================
+   تصویر ورود
+========================= */
 
-        output.textContent =
-            "فایل انتخاب شد: " + file.name;
+document
+.getElementById("splashFile")
+.addEventListener(
+    "change",
+    async function(){
+
+        const file =
+            this.files[0];
+
+        if(!file)
+            return;
+
+        splashData =
+            await readFile(file);
+
+        const preview =
+            document.getElementById(
+                "splashPreview"
+            );
+
+        preview.src =
+            splashData;
+
+        preview.style.display =
+            "block";
+
+    }
+);
+
+
+/* =========================
+   آماده‌سازی
+========================= */
+
+function prepareBuild(){
+
+    const appName =
+        document
+        .getElementById("appName")
+        .value
+        .trim();
+
+    const siteUrl =
+        document
+        .getElementById("siteUrl")
+        .value
+        .trim();
+
+    const htmlCode =
+        document
+        .getElementById("htmlCode")
+        .value
+        .trim();
+
+    const splashText =
+        document
+        .getElementById("splashText")
+        .value
+        .trim();
+
+
+    if(!appName){
+
+        alert(
+            "نام برنامه را وارد کن."
+        );
+
+        return;
 
     }
 
-}
+
+    if(!siteUrl && !htmlCode){
+
+        alert(
+            "لینک سایت یا HTML را وارد کن."
+        );
+
+        return;
+
+    }
 
 
-/* ================= ICON ================= */
+    const data = {
 
-function previewIcon(event){
+        appName:
+            appName,
 
-    const file =
-        event.target.files[0];
+        siteUrl:
+            siteUrl,
 
-    if(!file) return;
+        htmlCode:
+            htmlCode,
 
+        splashText:
+            splashText,
 
-    const reader =
-        new FileReader();
+        icon:
+            iconData,
 
-
-    reader.onload = function(e){
-
-        document
-            .getElementById("iconImage")
-            .src = e.target.result;
-
-        document
-            .getElementById("iconPreview")
-            .classList.remove("hidden");
+        splash:
+            splashData
 
     };
 
 
-    reader.readAsDataURL(file);
+    localStorage.setItem(
+        "apkBuilderProject",
+        JSON.stringify(data)
+    );
+
+
+    document
+    .getElementById("status")
+    .innerHTML =
+
+        "✅ اطلاعات برنامه ذخیره شد.<br><br>" +
+
+        "نام: " +
+        appName +
+        "<br>" +
+
+        "لینک: " +
+        (
+            siteUrl ||
+            "HTML سفارشی"
+        ) +
+
+        "<br><br>" +
+
+        "<span class='warning'>" +
+        "مرحله بعد: ارسال اطلاعات به GitHub Actions و ساخت APK." +
+        "</span>";
+
+
+    document
+    .getElementById("output")
+    .style.display =
+        "block";
 
 }
 
 
-/* ================= VALIDATION ================= */
+/* =========================
+   دانلود APK
+========================= */
 
-function validate(){
+function downloadAPK(){
 
-    const name =
-        document.getElementById("appName")
-        .value
-        .trim();
-
-
-    const packageName =
-        document.getElementById("packageName")
-        .value
-        .trim();
-
-
-    if(!name){
-
-        alert("لطفاً نام برنامه را وارد کنید.");
-
-        return false;
-
-    }
-
-
-    const packageRegex =
-        /^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)+$/;
-
-
-    if(!packageRegex.test(packageName)){
-
-        alert(
-            "شناسه برنامه صحیح نیست.\nمثال:\ncom.example.myapp"
-        );
-
-        return false;
-
-    }
-
-
-    if(buildMode === "url"){
-
-        const url =
-            document.getElementById("siteUrl")
-            .value
-            .trim();
-
-
-        if(!url){
-
-            alert("لطفاً آدرس سایت را وارد کنید.");
-
-            return false;
-
-        }
-
-
-        if(
-            !url.startsWith("http://") &&
-            !url.startsWith("https://")
-        ){
-
-            alert(
-                "آدرس باید با http:// یا https:// شروع شود."
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-    if(buildMode === "html"){
-
-        const file =
-            document.getElementById("htmlFile")
-            .files[0];
-
-
-        if(!file){
-
-            alert("لطفاً فایل HTML را انتخاب کنید.");
-
-            return false;
-
-        }
-
-    }
-
-
-    return true;
+    alert(
+        "بعد از اتصال GitHub Actions، APK واقعی از این قسمت دریافت می‌شود."
+    );
 
 }
 
 
-/* ================= BUILD ================= */
+/* =========================
+   دانلود ZIP
+========================= */
 
-function startBuild(){
+function downloadZIP(){
 
-    if(!validate()) return;
-
-
-    const status =
-        document.getElementById("status");
-
-
-    status.style.display = "block";
-
-
-    status.innerHTML =
-        "⏳ اطلاعات بررسی شد.<br><br>" +
-        "🔧 آماده‌سازی پروژه APK...";
-
-
-    /*
-       فعلاً Build واقعی اینجا متصل نشده است.
-       در مرحله بعد GitHub Actions را به این قسمت
-       متصل می‌کنیم.
-    */
-
-
-    setTimeout(function(){
-
-        status.innerHTML =
-            "✅ اطلاعات برنامه آماده است.<br><br>" +
-            "مرحله بعد: اتصال به GitHub Actions";
-
-    },1500);
+    alert(
+        "بعد از اتصال GitHub Actions، ZIP شامل APK از این قسمت دریافت می‌شود."
+    );
 
 }
+
 
 </script>
 
+
 </body>
-      </html>
+
+</html>
