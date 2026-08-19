@@ -11,22 +11,12 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
 
-      # =========================
-      # 1. دریافت پروژه
-      # =========================
-
       - name: Checkout
         uses: actions/checkout@v4
-
-
-      # =========================
-      # 2. Java
-      # =========================
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -34,58 +24,24 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-
-      # =========================
-      # 3. Node
-      # =========================
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
 
-
-      # =========================
-      # 4. بررسی HTML
-      # =========================
-
       - name: Check HTML
         run: |
+          echo "Checking www/index.html..."
 
-          echo "Checking index.html..."
-
-          if [ ! -f "index.html" ]; then
-            echo "ERROR: index.html not found!"
+          if [ ! -f "www/index.html" ]; then
+            echo "ERROR: www/index.html not found!"
             exit 1
           fi
 
-          echo "index.html found."
-
-
-      # =========================
-      # 5. ساخت پوشه www
-      # =========================
-
-      - name: Prepare Web App
-        run: |
-
-          rm -rf www
-
-          mkdir -p www
-
-          cp index.html www/index.html
-
-          echo "Web files:"
-          ls -lah www
-
-
-      # =========================
-      # 6. ساخت package.json
-      # =========================
+          echo "HTML found successfully."
 
       - name: Create package.json
         run: |
-
           cat > package.json <<'EOF'
           {
             "name": "custom-apk-builder",
@@ -100,26 +56,13 @@ jobs:
           }
           EOF
 
-
-      # =========================
-      # 7. نصب Capacitor
-      # =========================
-
       - name: Install Capacitor
         run: |
-
           npm install
-
           npm install @capacitor/android@7.4.3
-
-
-      # =========================
-      # 8. ساخت Capacitor Config
-      # =========================
 
       - name: Create Capacitor Config
         run: |
-
           cat > capacitor.config.json <<'EOF'
           {
             "appId": "com.custom.apk",
@@ -128,59 +71,22 @@ jobs:
           }
           EOF
 
-
-      # =========================
-      # 9. ساخت Android
-      # =========================
-
       - name: Add Android
         run: |
-
           npx cap add android
-
-
-      # =========================
-      # 10. انتقال HTML
-      # =========================
 
       - name: Sync Capacitor
         run: |
-
           npx cap sync android
-
-
-      # =========================
-      # 11. بررسی اینکه HTML واقعاً وارد APK شده
-      # =========================
-
-      - name: Verify Web App
-        run: |
-
-          echo "Checking Android assets..."
-
-          find android/app/src/main/assets -type f | head -50
-
-
-      # =========================
-      # 12. ساخت APK
-      # =========================
 
       - name: Build APK
         working-directory: android
         run: |
-
           chmod +x gradlew
-
           ./gradlew assembleDebug --stacktrace
-
-
-      # =========================
-      # 13. آماده کردن خروجی
-      # =========================
 
       - name: Prepare Output
         run: |
-
           mkdir -p output
 
           cp \
@@ -194,24 +100,13 @@ jobs:
             Custom-APK.apk
 
           echo "========== OUTPUT =========="
-
           ls -lah
-
-
-      # =========================
-      # 14. تحویل APK
-      # =========================
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Custom-APK
           path: output/Custom-APK.apk
-
-
-      # =========================
-      # 15. تحویل ZIP
-      # =========================
 
       - name: Upload ZIP
         uses: actions/upload-artifact@v4
