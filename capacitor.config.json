@@ -1,0 +1,6 @@
+{
+  "appId": "com.apkbuilder.app",
+  "appName": "APK Builder",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
