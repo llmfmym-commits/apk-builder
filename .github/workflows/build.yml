@@ -2,9 +2,6 @@ name: Build Custom APK
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 permissions:
   contents: write
@@ -17,17 +14,9 @@ jobs:
 
     steps:
 
-      # =========================
-      # Checkout
-      # =========================
-
       - name: Checkout
         uses: actions/checkout@v4
 
-
-      # =========================
-      # Java
-      # =========================
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -36,86 +25,75 @@ jobs:
           java-version: "21"
 
 
-      # =========================
-      # Node
-      # =========================
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
 
 
-      # =========================
-      # Check HTML
-      # =========================
+      - name: Check Secret
+        run: |
+
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "GH_TOKEN not found"
+            exit 1
+          fi
+
+          echo "GH_TOKEN loaded successfully"
+
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
 
       - name: Check HTML
         run: |
 
-          echo "Checking www/index.html..."
+          echo "Checking website files..."
 
           if [ ! -f "www/index.html" ]; then
-            echo "ERROR: www/index.html not found!"
+            echo "ERROR: www/index.html not found"
             exit 1
           fi
 
-          echo "HTML found successfully."
+          echo "HTML OK"
 
-
-      # =========================
-      # Create package.json
-      # =========================
 
       - name: Create package.json
         run: |
 
           cat > package.json <<'EOF'
           {
-            "name": "custom-apk-builder",
+            "name": "apk-builder",
             "version": "1.0.0",
             "private": true,
             "dependencies": {
               "@capacitor/core": "^7.4.3"
             },
             "devDependencies": {
-              "@capacitor/cli": "^7.4.3"
+              "@capacitor/cli": "^7.4.3",
+              "@capacitor/android": "^7.4.3"
             }
           }
           EOF
 
 
-      # =========================
-      # Install Capacitor
-      # =========================
-
-      - name: Install Capacitor
+      - name: Install
         run: |
 
           npm install
 
-          npm install @capacitor/android@7.4.3
-
-
-      # =========================
-      # Capacitor Config
-      # =========================
 
       - name: Create Capacitor Config
         run: |
 
           cat > capacitor.config.json <<'EOF'
           {
-            "appId": "com.custom.apk",
-            "appName": "Custom APK",
+            "appId": "com.generated.app",
+            "appName": "Generated APK",
             "webDir": "www"
           }
           EOF
 
-
-      # =========================
-      # Add Android
-      # =========================
 
       - name: Add Android
         run: |
@@ -123,19 +101,11 @@ jobs:
           npx cap add android
 
 
-      # =========================
-      # Sync
-      # =========================
-
-      - name: Sync Capacitor
+      - name: Sync Android
         run: |
 
           npx cap sync android
 
-
-      # =========================
-      # Build APK
-      # =========================
 
       - name: Build APK
         working-directory: android
@@ -143,76 +113,36 @@ jobs:
 
           chmod +x gradlew
 
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug
 
 
-      # =========================
-      # Prepare Output
-      # =========================
-
-      - name: Prepare Output
+      - name: Prepare Files
         run: |
 
-          mkdir -p output
+          mkdir output
 
-          cp \
-            android/app/build/outputs/apk/debug/app-debug.apk \
-            output/Custom-APK.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk output/app.apk
 
           cd output
 
-          zip \
-            Custom-APK.zip \
-            Custom-APK.apk
-
-          echo "========== OUTPUT =========="
-
-          ls -lah
+          zip app.zip app.apk
 
 
-      # =========================
-      # Upload Artifact
-      # =========================
-
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
 
         with:
-          name: Custom-APK
-          path: output/Custom-APK.apk
+
+          name: APK
+
+          path: output/app.apk
 
 
-      - name: Upload ZIP Artifact
+      - name: Upload ZIP
         uses: actions/upload-artifact@v4
 
         with:
-          name: Custom-APK-ZIP
-          path: output/Custom-APK.zip
 
+          name: APK-ZIP
 
-      # =========================
-      # Create GitHub Release
-      # =========================
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-
-        with:
-
-          tag_name: "build-${{ github.run_number }}"
-
-          name: "Custom APK Build ${{ github.run_number }}"
-
-          body: |
-            APK ساخته شده توسط APK Builder.
-
-            Build Number:
-            ${{ github.run_number }}
-
-          files: |
-            output/Custom-APK.apk
-            output/Custom-APK.zip
-
-        env:
-
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: output/app.zip
