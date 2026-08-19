@@ -44,13 +44,27 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Prepare APK
+      - name: Prepare output
         run: |
           mkdir -p output
-          cp android/app/build/outputs/apk/debug/app-debug.apk output/APK-Builder.apk
+
+          cp android/app/build/outputs/apk/debug/app-debug.apk \
+             output/APK-Builder.apk
+
+          cd output
+
+          zip APK-Builder.zip APK-Builder.apk
+
+          cd ..
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: APK-Builder
+          name: APK-Builder-APK
           path: output/APK-Builder.apk
+
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: APK-Builder-ZIP
+          path: output/APK-Builder.zip
