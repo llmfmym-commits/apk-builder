@@ -7,16 +7,27 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
+
   build:
+
     runs-on: ubuntu-latest
 
     steps:
 
+      # =========================
+      # Checkout
+      # =========================
+
       - name: Checkout
         uses: actions/checkout@v4
+
+
+      # =========================
+      # Java
+      # =========================
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -24,13 +35,24 @@ jobs:
           distribution: temurin
           java-version: "21"
 
+
+      # =========================
+      # Node
+      # =========================
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
 
+
+      # =========================
+      # Check HTML
+      # =========================
+
       - name: Check HTML
         run: |
+
           echo "Checking www/index.html..."
 
           if [ ! -f "www/index.html" ]; then
@@ -40,8 +62,14 @@ jobs:
 
           echo "HTML found successfully."
 
+
+      # =========================
+      # Create package.json
+      # =========================
+
       - name: Create package.json
         run: |
+
           cat > package.json <<'EOF'
           {
             "name": "custom-apk-builder",
@@ -56,13 +84,26 @@ jobs:
           }
           EOF
 
+
+      # =========================
+      # Install Capacitor
+      # =========================
+
       - name: Install Capacitor
         run: |
+
           npm install
+
           npm install @capacitor/android@7.4.3
+
+
+      # =========================
+      # Capacitor Config
+      # =========================
 
       - name: Create Capacitor Config
         run: |
+
           cat > capacitor.config.json <<'EOF'
           {
             "appId": "com.custom.apk",
@@ -71,22 +112,47 @@ jobs:
           }
           EOF
 
+
+      # =========================
+      # Add Android
+      # =========================
+
       - name: Add Android
         run: |
+
           npx cap add android
+
+
+      # =========================
+      # Sync
+      # =========================
 
       - name: Sync Capacitor
         run: |
+
           npx cap sync android
+
+
+      # =========================
+      # Build APK
+      # =========================
 
       - name: Build APK
         working-directory: android
         run: |
+
           chmod +x gradlew
+
           ./gradlew assembleDebug --stacktrace
+
+
+      # =========================
+      # Prepare Output
+      # =========================
 
       - name: Prepare Output
         run: |
+
           mkdir -p output
 
           cp \
@@ -100,16 +166,53 @@ jobs:
             Custom-APK.apk
 
           echo "========== OUTPUT =========="
+
           ls -lah
 
-      - name: Upload APK
+
+      # =========================
+      # Upload Artifact
+      # =========================
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
+
         with:
           name: Custom-APK
           path: output/Custom-APK.apk
 
-      - name: Upload ZIP
+
+      - name: Upload ZIP Artifact
         uses: actions/upload-artifact@v4
+
         with:
           name: Custom-APK-ZIP
           path: output/Custom-APK.zip
+
+
+      # =========================
+      # Create GitHub Release
+      # =========================
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+
+        with:
+
+          tag_name: "build-${{ github.run_number }}"
+
+          name: "Custom APK Build ${{ github.run_number }}"
+
+          body: |
+            APK ساخته شده توسط APK Builder.
+
+            Build Number:
+            ${{ github.run_number }}
+
+          files: |
+            output/Custom-APK.apk
+            output/Custom-APK.zip
+
+        env:
+
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
