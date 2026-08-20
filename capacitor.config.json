@@ -1,4 +1,12 @@
 {
+  "appName": "My APK App",
+  "siteUrl": "",
+  "htmlCode": "",
+  "splashText": "Loading...",
+  "icon": "",
+  "splash": ""
+}
+{
   "appId": "com.apkbuilder.app",
   "appName": "APK Builder",
   "webDir": "www",
