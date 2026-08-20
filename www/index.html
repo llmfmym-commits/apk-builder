@@ -2,7 +2,6 @@
 <html lang="fa" dir="rtl">
 
 <head>
-
 <meta charset="UTF-8">
 
 <meta
@@ -93,8 +92,12 @@ textarea:focus{
     border-color:#5875ff;
 }
 
-button{
+button,
+.download-link{
     width:100%;
+    display:block;
+    text-align:center;
+    text-decoration:none;
     border:0;
     border-radius:16px;
     padding:17px;
@@ -106,11 +109,26 @@ button{
     cursor:pointer;
 }
 
-button:hover{
+button:hover,
+.download-link:hover{
     opacity:.9;
 }
 
 .button-secondary{
+    background:#182342;
+    border:1px solid #35446e;
+}
+
+.download{
+    display:block;
+    margin-top:10px;
+}
+
+.download-apk{
+    background:#08b875;
+}
+
+.download-zip{
     background:#182342;
     border:1px solid #35446e;
 }
@@ -125,14 +143,6 @@ button:hover{
     color:#b9c4df;
 }
 
-.download{
-    display:none;
-}
-
-.download button{
-    background:#08b875;
-}
-
 .footer{
     text-align:center;
     color:#657294;
@@ -143,12 +153,9 @@ button:hover{
 
 </head>
 
-
 <body>
 
-
 <div class="container">
-
 
 <div class="header">
 
@@ -163,11 +170,9 @@ button:hover{
 </div>
 
 
-
 <div class="card">
 
 <h2>⚙️ اطلاعات برنامه</h2>
-
 
 <label>
 نام برنامه
@@ -179,7 +184,6 @@ button:hover{
     placeholder="مثلاً My App"
 >
 
-
 <label>
 لینک سایت
 </label>
@@ -190,7 +194,6 @@ button:hover{
     placeholder="https://example.com"
 >
 
-
 <label>
 کد HTML
 </label>
@@ -200,11 +203,9 @@ button:hover{
     placeholder="کد HTML خود را اینجا قرار دهید..."
 ></textarea>
 
-
 <button onclick="saveConfig()">
 💾 ذخیره اطلاعات
 </button>
-
 
 <div
     id="status"
@@ -216,7 +217,6 @@ button:hover{
 </div>
 
 
-
 <div class="card">
 
 <h2>🔨 ساخت APK</h2>
@@ -225,80 +225,122 @@ button:hover{
 بعد از ذخیره اطلاعات، پروژه برای ساخت APK آماده می‌شود.
 </p>
 
-
 <button onclick="openActions()">
 ⚙️ مشاهده وضعیت ساخت در GitHub
 </button>
 
 
-<div class="download" id="downloadSection">
+<div class="download">
 
-<button onclick="downloadAPK()">
+<a
+    id="apkDownload"
+    class="download-link download-apk"
+    href="#"
+>
 📦 دانلود APK
-</button>
+</a>
 
-<button
-    class="button-secondary"
-    onclick="downloadZIP()"
+<a
+    id="zipDownload"
+    class="download-link download-zip"
+    href="#"
 >
 🗜️ دانلود ZIP
-</button>
+</a>
 
+</div>
+
+
+<div
+    id="releaseStatus"
+    class="status"
+>
+⏳ وضعیت فایل دانلودی در حال بررسی است...
 </div>
 
 
 <div class="status">
 
-<b>نکته:</b>
-
-<br>
-
-بعد از اجرای GitHub Actions،
-خروجی APK ساخته می‌شود.
+<b>نحوه کار:</b>
 
 <br><br>
 
-در مرحله بعد، سیستم را طوری تغییر می‌دهیم
-که APK و ZIP به‌صورت Release منتشر شوند
-و لینک دانلود مستقیم داشته باشند.
+1️⃣ اطلاعات برنامه را ذخیره کن.
+
+<br>
+
+2️⃣ GitHub Actions برنامه را می‌سازد.
+
+<br>
+
+3️⃣ APK در GitHub Release قرار می‌گیرد.
+
+<br>
+
+4️⃣ سپس از همین صفحه می‌توانی APK را دانلود کنی.
 
 </div>
 
 </div>
-
 
 
 <div class="footer">
 
-APK Builder v2.0
+APK Builder v3.0
 
 </div>
 
-
 </div>
-
 
 
 <script>
-
 
 /*
 |--------------------------------------------------------------------------
 | تنظیمات GitHub
 |--------------------------------------------------------------------------
-|
-| این دو مقدار را در مرحله بعد تنظیم می‌کنیم.
-|
 */
 
-
 const GITHUB_OWNER =
-    "YOUR_GITHUB_USERNAME";
-
+    "llmfymm-commits";
 
 const GITHUB_REPOSITORY =
-    "YOUR_REPOSITORY_NAME";
+    "apk-builder";
 
+
+/*
+|--------------------------------------------------------------------------
+| آدرس Release
+|--------------------------------------------------------------------------
+*/
+
+const APK_URL =
+    "https://github.com/" +
+    GITHUB_OWNER +
+    "/" +
+    GITHUB_REPOSITORY +
+    "/releases/latest/download/app.apk";
+
+
+const ZIP_URL =
+    "https://github.com/" +
+    GITHUB_OWNER +
+    "/" +
+    GITHUB_REPOSITORY +
+    "/releases/latest/download/Custom-APK.zip";
+
+
+/*
+|--------------------------------------------------------------------------
+| تنظیم لینک دانلود
+|--------------------------------------------------------------------------
+*/
+
+document.getElementById("apkDownload").href =
+    APK_URL;
+
+document.getElementById("zipDownload").href =
+    ZIP_URL;
 
 
 /*
@@ -367,7 +409,6 @@ function saveConfig(){
 }
 
 
-
 /*
 |--------------------------------------------------------------------------
 | باز کردن GitHub Actions
@@ -375,19 +416,6 @@ function saveConfig(){
 */
 
 function openActions(){
-
-    if(
-        GITHUB_OWNER ===
-        "YOUR_GITHUB_USERNAME"
-    ){
-
-        alert(
-            "در مرحله بعد نام کاربری و نام Repository را تنظیم می‌کنیم."
-        );
-
-        return;
-    }
-
 
     const url =
         "https://github.com/" +
@@ -405,37 +433,85 @@ function openActions(){
 }
 
 
-
 /*
 |--------------------------------------------------------------------------
-| دانلود APK
+| بررسی Release
 |--------------------------------------------------------------------------
 */
 
-function downloadAPK(){
+async function checkRelease(){
 
-    alert(
-        "لینک دانلود مستقیم APK در مرحله بعد فعال می‌شود."
-    );
+    const status =
+        document.getElementById(
+            "releaseStatus"
+        );
+
+
+    try{
+
+        const response =
+            await fetch(
+                "https://api.github.com/repos/" +
+                GITHUB_OWNER +
+                "/" +
+                GITHUB_REPOSITORY +
+                "/releases/latest"
+            );
+
+
+        if(!response.ok){
+
+            status.innerHTML =
+                "⏳ هنوز APK منتشر نشده است. بعد از سبز شدن GitHub Actions دوباره امتحان کن.";
+
+            return;
+        }
+
+
+        const release =
+            await response.json();
+
+
+        const apk =
+            release.assets.find(
+                asset =>
+                asset.name === "app.apk"
+            );
+
+
+        if(apk){
+
+            document.getElementById(
+                "apkDownload"
+            ).href =
+                apk.browser_download_url;
+
+
+            status.innerHTML =
+                "✅ APK آماده دانلود است.<br>" +
+                "نسخه: " +
+                (release.tag_name || "آخرین نسخه");
+
+        }
+        else{
+
+            status.innerHTML =
+                "⏳ Release ساخته شده ولی APK هنوز داخل آن قرار نگرفته است.";
+
+        }
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+        status.innerHTML =
+            "⚠️ اتصال به GitHub برای بررسی وضعیت فایل انجام نشد.";
+
+    }
 
 }
-
-
-
-/*
-|--------------------------------------------------------------------------
-| دانلود ZIP
-|--------------------------------------------------------------------------
-*/
-
-function downloadZIP(){
-
-    alert(
-        "لینک دانلود مستقیم ZIP در مرحله بعد فعال می‌شود."
-    );
-
-}
-
 
 
 /*
@@ -497,12 +573,18 @@ function loadConfig(){
 }
 
 
+/*
+|--------------------------------------------------------------------------
+| شروع
+|--------------------------------------------------------------------------
+*/
+
 loadConfig();
 
+checkRelease();
 
 </script>
 
-
 </body>
 
-</html>
+    </html>
