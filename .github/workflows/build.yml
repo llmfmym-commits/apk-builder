@@ -1,6 +1,10 @@
 name: Build Custom APK
 
 on:
+  push:
+    branches:
+      - main
+
   workflow_dispatch:
 
 permissions:
@@ -31,31 +35,30 @@ jobs:
           node-version: "22"
 
 
-      - name: Check Secret
+      - name: Check Build Configuration
         run: |
 
-          if [ -z "${GH_TOKEN}" ]; then
-            echo "GH_TOKEN not found"
+          echo "Checking build-config.json..."
+
+          if [ ! -f "build-config.json" ]; then
+            echo "ERROR: build-config.json not found!"
             exit 1
           fi
 
-          echo "GH_TOKEN loaded successfully"
-
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          echo "build-config.json found."
 
 
-      - name: Check HTML
+      - name: Check Website
         run: |
 
-          echo "Checking website files..."
+          echo "Checking index.html..."
 
           if [ ! -f "www/index.html" ]; then
-            echo "ERROR: www/index.html not found"
+            echo "ERROR: www/index.html not found!"
             exit 1
           fi
 
-          echo "HTML OK"
+          echo "index.html found."
 
 
       - name: Create package.json
@@ -77,34 +80,125 @@ jobs:
           EOF
 
 
-      - name: Install
+      - name: Install Capacitor
+        run: npm install
+
+
+      - name: Read App Configuration
         run: |
 
-          npm install
+          python3 <<'PY'
+
+          import json
+          from pathlib import Path
+
+          config = json.loads(
+              Path("build-config.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          print("App name:", config.get("appName", "My App"))
+          print("Site URL:", config.get("siteUrl", ""))
+
+          PY
 
 
       - name: Create Capacitor Config
         run: |
 
-          cat > capacitor.config.json <<'EOF'
-          {
-            "appId": "com.generated.app",
-            "appName": "Generated APK",
-            "webDir": "www"
+          python3 <<'PY'
+
+          import json
+          from pathlib import Path
+
+          config = json.loads(
+              Path("build-config.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          app_name = config.get(
+              "appName",
+              "My App"
+          )
+
+          capacitor = {
+              "appId": "com.apkbuilder.generated",
+              "appName": app_name,
+              "webDir": "www"
           }
-          EOF
+
+          Path(
+              "capacitor.config.json"
+          ).write_text(
+              json.dumps(
+                  capacitor,
+                  ensure_ascii=False,
+                  indent=2
+              ),
+              encoding="utf-8"
+          )
+
+          print("Capacitor configuration created.")
+
+          PY
 
 
       - name: Add Android
-        run: |
-
-          npx cap add android
+        run: npx cap add android
 
 
       - name: Sync Android
+        run: npx cap sync android
+
+
+      - name: Configure App Name
         run: |
 
-          npx cap sync android
+          python3 <<'PY'
+
+          import json
+          import re
+          from pathlib import Path
+
+          config = json.loads(
+              Path("build-config.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          app_name = config.get(
+              "appName",
+              "My App"
+          )
+
+          strings = Path(
+              "android/app/src/main/res/values/strings.xml"
+          )
+
+          if strings.exists():
+
+              text = strings.read_text(
+                  encoding="utf-8"
+              )
+
+              text = re.sub(
+                  r'<string name="app_name">.*?</string>',
+                  '<string name="app_name">'
+                  + app_name
+                  + '</string>',
+                  text
+              )
+
+              strings.write_text(
+                  text,
+                  encoding="utf-8"
+              )
+
+          print("App name configured:", app_name)
+
+          PY
 
 
       - name: Build APK
@@ -116,25 +210,27 @@ jobs:
           ./gradlew assembleDebug
 
 
-      - name: Prepare Files
+      - name: Prepare APK and ZIP
         run: |
 
-          mkdir output
+          mkdir -p output
 
-          cp android/app/build/outputs/apk/debug/app-debug.apk output/app.apk
+          cp \
+            android/app/build/outputs/apk/debug/app-debug.apk \
+            output/app.apk
 
           cd output
 
-          zip app.zip app.apk
+          zip \
+            Custom-APK.zip \
+            app.apk
 
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
 
         with:
-
-          name: APK
-
+          name: Custom-APK
           path: output/app.apk
 
 
@@ -142,8 +238,5 @@ jobs:
         uses: actions/upload-artifact@v4
 
         with:
-
-          name: APK-ZIP
-
-          path: output/app.zip
-          # updated
+          name: Custom-APK-ZIP
+          path: output/Custom-APK.zip
