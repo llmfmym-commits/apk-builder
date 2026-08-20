@@ -1,25 +1,34 @@
 name: Build Custom APK
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
 
-  workflow_dispatch:
-
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
 
       - name: Checkout
         uses: actions/checkout@v4
+
+
+      - name: Check Website
+        run: |
+          echo "Checking www/index.html..."
+
+          if [ ! -f "www/index.html" ]; then
+            echo "ERROR: www/index.html not found!"
+            exit 1
+          fi
+
+          echo "www/index.html found successfully."
 
 
       - name: Setup Java
@@ -35,208 +44,66 @@ jobs:
           node-version: "22"
 
 
-      - name: Check Build Configuration
-        run: |
-
-          echo "Checking build-config.json..."
-
-          if [ ! -f "build-config.json" ]; then
-            echo "ERROR: build-config.json not found!"
-            exit 1
-          fi
-
-          echo "build-config.json found."
-
-
-      - name: Check Website
-        run: |
-
-          echo "Checking index.html..."
-
-          if [ ! -f "www/index.html" ]; then
-            echo "ERROR: www/index.html not found!"
-            exit 1
-          fi
-
-          echo "index.html found."
-
-
       - name: Create package.json
         run: |
-
-          cat > package.json <<'EOF'
+          cat > package.json <<'JSON'
           {
-            "name": "apk-builder",
+            "name": "custom-apk-builder",
             "version": "1.0.0",
             "private": true,
             "dependencies": {
-              "@capacitor/core": "^7.4.3"
-            },
-            "devDependencies": {
-              "@capacitor/cli": "^7.4.3",
-              "@capacitor/android": "^7.4.3"
+              "@capacitor/core": "^7.4.0",
+              "@capacitor/android": "^7.4.0",
+              "@capacitor/cli": "^7.4.0"
             }
           }
-          EOF
+          JSON
 
 
       - name: Install Capacitor
-        run: npm install
-
-
-      - name: Read App Configuration
         run: |
-
-          python3 <<'PY'
-
-          import json
-          from pathlib import Path
-
-          config = json.loads(
-              Path("build-config.json").read_text(
-                  encoding="utf-8"
-              )
-          )
-
-          print("App name:", config.get("appName", "My App"))
-          print("Site URL:", config.get("siteUrl", ""))
-
-          PY
+          npm install
 
 
       - name: Create Capacitor Config
         run: |
-
-          python3 <<'PY'
-
-          import json
-          from pathlib import Path
-
-          config = json.loads(
-              Path("build-config.json").read_text(
-                  encoding="utf-8"
-              )
-          )
-
-          app_name = config.get(
-              "appName",
-              "My App"
-          )
-
-          capacitor = {
-              "appId": "com.apkbuilder.generated",
-              "appName": app_name,
-              "webDir": "www"
+          cat > capacitor.config.json <<'JSON'
+          {
+            "appId": "com.apkbuilder.generated",
+            "appName": "Custom APK",
+            "webDir": "www"
           }
-
-          Path(
-              "capacitor.config.json"
-          ).write_text(
-              json.dumps(
-                  capacitor,
-                  ensure_ascii=False,
-                  indent=2
-              ),
-              encoding="utf-8"
-          )
-
-          print("Capacitor configuration created.")
-
-          PY
+          JSON
 
 
       - name: Add Android
-        run: npx cap add android
+        run: |
+          npx cap add android
 
 
       - name: Sync Android
-        run: npx cap sync android
-
-
-      - name: Configure App Name
         run: |
-
-          python3 <<'PY'
-
-          import json
-          import re
-          from pathlib import Path
-
-          config = json.loads(
-              Path("build-config.json").read_text(
-                  encoding="utf-8"
-              )
-          )
-
-          app_name = config.get(
-              "appName",
-              "My App"
-          )
-
-          strings = Path(
-              "android/app/src/main/res/values/strings.xml"
-          )
-
-          if strings.exists():
-
-              text = strings.read_text(
-                  encoding="utf-8"
-              )
-
-              text = re.sub(
-                  r'<string name="app_name">.*?</string>',
-                  '<string name="app_name">'
-                  + app_name
-                  + '</string>',
-                  text
-              )
-
-              strings.write_text(
-                  text,
-                  encoding="utf-8"
-              )
-
-          print("App name configured:", app_name)
-
-          PY
+          npx cap sync android
 
 
       - name: Build APK
         working-directory: android
         run: |
-
           chmod +x gradlew
-
           ./gradlew assembleDebug
 
 
-      - name: Prepare APK and ZIP
+      - name: Prepare APK
         run: |
-
           mkdir -p output
 
           cp \
             android/app/build/outputs/apk/debug/app-debug.apk \
-            output/app.apk
-
-          cd output
-
-          zip \
-            Custom-APK.zip \
-            app.apk
+            output/Custom-APK.apk
 
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
-
         with:
           name: Custom-APK
-          path: output/app.apk
-
-
-      - name: Upload ZIP
-        uses: actions/upload-artifact@v4
-
-        with:
-          name: Custom-APK-ZIP
-          path: output/Custom-APK.zip
+          path: output/Custom-APK.apk
